@@ -4,6 +4,7 @@ namespace App\Http\Traits;
 
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Http\Request;
 use Throwable;
 
@@ -18,6 +19,11 @@ trait ApiException{
             if($e instanceof HttpException){
                 return $this->httpException($e);
             }
+
+            if($e instanceof ValidationException){
+                return $this->validationException($e);
+            }
+
             return $this->genericExceptions();
         }
     }
@@ -38,6 +44,11 @@ trait ApiException{
             "02",
             500
         );
+    }
+
+    protected function validationException($e)
+    {
+        return response()->json($e->errors(), $e->status);
     }
 
     protected function httpException($e)
