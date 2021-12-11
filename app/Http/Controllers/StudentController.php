@@ -5,6 +5,10 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Http\Requests\StudentRequest;
 use App\Models\Student;
+use App\Http\Resources\Student as StudentResource;
+use App\Http\Resources\Students as StudentCollection;
+
+
 class StudentController extends Controller
 {
     /**
@@ -12,9 +16,15 @@ class StudentController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        return Student::get();
+        if($request->query('includes') === 'classroom'){
+            $student = Student::with('classroom')->paginate(1);
+        }else{
+            $student = Student::paginate(1);
+        }
+        return (new StudentCollection($student))
+                    ->response()->setStatusCode(200);
     }
 
     /**
@@ -36,7 +46,7 @@ class StudentController extends Controller
      */
     public function show(Student $student)
     {
-        return $student;
+        return new StudentResource($student);
     }
 
     /**
